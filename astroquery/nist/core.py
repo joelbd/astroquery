@@ -159,40 +159,69 @@ class NistClass(BaseQuery):
                                  timeout=Nist.TIMEOUT)
         return response
 
-    def _parse_result(self, response, verbose=False):
+    def _parse_result(self, response, verbose = False):
         """
-        Parses the results form the HTTP response to `astropy.table.Table`.
+        Parses the results from the CSV response to 'astropy.table.Table'
 
         Parameters
         ----------
-        response : `requests.Response`
-            The HTTP response object
+        response : 'requests.Response'
+            The CSV response object
 
         Returns
         -------
-        table : `astropy.table.Table`
+        table : 'astropy.table.Table'
         """
 
-        pre_re = re.compile("<pre>(.*)</pre>", flags=re.DOTALL)
-        links_re = re.compile(r"<a.*?>\s*(\w+)\s*</a>")
-        content = str(response.text)
+        content = response
 
         try:
-            pre = pre_re.findall(content)[0]
+            data = asciitable.read(content, format='csv', fast_reader=False)
         except IndexError:
             raise Exception("Result did not contain a table")
         try:
-            table = _strip_blanks(pre)
-            table = links_re.sub(r'\1', table)
-            table = asciitable.read(table, Reader=asciitable.FixedWidth,
-                                    data_start=3, delimiter='|')
             return table
         except Exception as ex:
             self.response = response
             self.table_parse_error = ex
-            raise TableParseError("Failed to parse asciitable! The raw "
+            raise TableParseError("Failed to parse CSV! The raw "
                                   "response can be found in self.response, "
                                   "and the error in self.table_parse_error.")
+
+    # def _parse_result(self, response, verbose=False):
+    #     """
+    #     Parses the results form the HTTP response to `astropy.table.Table`.
+
+    #     Parameters
+    #     ----------
+    #     response : `requests.Response`
+    #         The HTTP response object
+
+    #     Returns
+    #     -------
+    #     table : `astropy.table.Table`
+    #     """
+
+    #     pre_re = re.compile("<pre>(.*)</pre>", flags=re.DOTALL)
+    #     links_re = re.compile(r"<a.*?>\s*(\w+)\s*</a>")
+    #     content = str(response.text)
+
+    #     try:
+    #         pre = pre_re.findall(content)[0]
+    #     except IndexError:
+    #         raise Exception("Result did not contain a table")
+    #     try:
+    #         table = _strip_blanks(pre)
+    #         table = links_re.sub(r'\1', table)
+    #         table = asciitable.read(table, Reader=asciitable.FixedWidth,
+    #                                 data_start=3, delimiter='|')
+    #         return table
+    #     except Exception as ex:
+    #         self.response = response
+    #         self.table_parse_error = ex
+    #         raise TableParseError("Failed to parse asciitable! The raw "
+    #                               "response can be found in self.response, "
+    #                               "and the error in self.table_parse_error.")
 
 
 Nist = NistClass()

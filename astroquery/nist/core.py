@@ -83,14 +83,31 @@ class NistClass(BaseQuery):
             The dictionary of parameters sent with the HTTP request
 
         """
+
+
+        """
+        Changes
+        -------
+        limits_type : Defines the unit of the wav, 0 = wavelength; 1 = wavenumber
+        format = 2 : This should deliver a CSV free of headers instead of the http response.
+            This should be easier to parse and faster.
+        remove_js : Disables javascript for the query
+        no_spaces : removes extra whitespace from the csv output.
+            This should be faster.
+
+        """
         request_payload = {}
         request_payload["spectra"] = kwargs['linename']
         (min_wav, max_wav, wav_unit) = _parse_wavelength(args[0], args[1])
+        # request_payload["limits_type"] = 0
         request_payload["low_wl"] = min_wav
         request_payload["upp_wl"] = max_wav
         request_payload["unit"] = wav_unit
         request_payload["submit"] = "Retrieve Data"
+        # request_payload["format"] = 2 # This should output CSV
         request_payload["format"] = 1  # ascii
+        # request_payload["remove_js"] = "on" # Disables Javascript
+        # request_payload["no_spaces"] = "on" # Remove spaces from results
         request_payload["line_out"] = 0  # All lines
         request_payload["en_unit"] = Nist.energy_level_code[
             kwargs["energy_level_unit"]]

@@ -92,22 +92,19 @@ class NistClass(BaseQuery):
         format = 2 : This should deliver a CSV free of headers instead of the http response.
             This should be easier to parse and faster.
         remove_js : Disables javascript for the query
-        no_spaces : removes extra whitespace from the csv output.
-            This should be faster.
 
         """
         request_payload = {}
         request_payload["spectra"] = kwargs['linename']
         (min_wav, max_wav, wav_unit) = _parse_wavelength(args[0], args[1])
-        # request_payload["limits_type"] = 0
+        request_payload["limits_type"] = 0
         request_payload["low_wl"] = min_wav
         request_payload["upp_wl"] = max_wav
         request_payload["unit"] = wav_unit
         request_payload["submit"] = "Retrieve Data"
-        # request_payload["format"] = 2 # This should output CSV
-        request_payload["format"] = 1  # ascii
-        # request_payload["remove_js"] = "on" # Disables Javascript
-        # request_payload["no_spaces"] = "on" # Remove spaces from results
+        request_payload["format"] = 2 # This should output CSV
+        # request_payload["format"] = 1  # ascii
+        request_payload["remove_js"] = "on" # Disables Javascript
         request_payload["line_out"] = 0  # All lines
         request_payload["en_unit"] = Nist.energy_level_code[
             kwargs["energy_level_unit"]]
@@ -173,13 +170,21 @@ class NistClass(BaseQuery):
         table : 'astropy.table.Table'
         """
 
-        content = response
-
+        content = str(response.text)
+        headers = ["Observed", "Ritz", "Intensity",
+                   "A_ki", "F_ik", "Acc",
+                   "E_i", "E_k", "Lower Conf_i",
+                   "Lower Term_i", "J_i", "Lower Conf_k",
+                   "Lower Term_k", "J_k", "Type",
+                   "Type Ref", "Line Ref", "blank"]
         try:
-            data = asciitable.read(content, format='csv', fast_reader=False)
+            table = asciitable.read(content, format = 'csv',
+                                   header_start = 0, data_start = 1,
+                                   delimiter = ',', names = headers)
         except IndexError:
             raise Exception("Result did not contain a table")
         try:
+            table.remove_column("blank")
             return table
         except Exception as ex:
             self.response = response
@@ -188,44 +193,7 @@ class NistClass(BaseQuery):
                                   "response can be found in self.response, "
                                   "and the error in self.table_parse_error.")
 
-    # def _parse_result(self, response, verbose=False):
-    #     """
-    #     Parses the results form the HTTP response to `astropy.table.Table`.
-
-    #     Parameters
-    #     ----------
-    #     response : `requests.Response`
-    #         The HTTP response object
-
-    #     Returns
-    #     -------
-    #     table : `astropy.table.Table`
-    #     """
-
-    #     pre_re = re.compile("<pre>(.*)</pre>", flags=re.DOTALL)
-    #     links_re = re.compile(r"<a.*?>\s*(\w+)\s*</a>")
-    #     content = str(response.text)
-
-    #     try:
-    #         pre = pre_re.findall(content)[0]
-    #     except IndexError:
-    #         raise Exception("Result did not contain a table")
-    #     try:
-    #         table = _strip_blanks(pre)
-    #         table = links_re.sub(r'\1', table)
-    #         table = asciitable.read(table, Reader=asciitable.FixedWidth,
-    #                                 data_start=3, delimiter='|')
-    #         return table
-    #     except Exception as ex:
-    #         self.response = response
-    #         self.table_parse_error = ex
-    #         raise TableParseError("Failed to parse asciitable! The raw "
-    #                               "response can be found in self.response, "
-    #                               "and the error in self.table_parse_error.")
-
-
 Nist = NistClass()
-
 
 def _parse_wavelength(min_wav, max_wav):
     """

@@ -7,7 +7,9 @@ import astropy.units as u
 import requests
 import imp
 
-from ... import nist
+import sys
+sys.path.append("/Users/joel/Documents/school/astroquery/astroquery/")
+from astroquery.nist import Nist
 
 imp.reload(requests)
 
@@ -16,9 +18,9 @@ imp.reload(requests)
 class TestNist:
 
     def test_query_async(self):
-        response = nist.core.Nist.query_async(4000 * u.nm, 7000 * u.nm)
+        response = nist.core.Nist.query_async(4000 * u.AA, 7000 * u.AA)
         assert response is not None
 
     def test_query(self):
-        result = nist.core.Nist.query(4000 * u.nm, 7000 * u.nm)
+        result = nist.core.Nist.query(4000 * u.AA, 7000 * u.AA)
         assert isinstance(result, Table)

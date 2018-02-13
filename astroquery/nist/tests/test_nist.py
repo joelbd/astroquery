@@ -9,7 +9,7 @@ import astropy.units as u
 from ...utils.testing_tools import MockResponse
 from ... import nist
 
-DATA_FILES = {'lines': 'nist_out.html'}
+DATA_FILES = {'lines': 'nist_out.txt'}
 
 
 def data_path(filename):

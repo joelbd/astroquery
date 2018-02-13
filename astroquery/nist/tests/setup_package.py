@@ -5,5 +5,5 @@ import os
 
 
 def get_package_data():
-    paths_test = [os.path.join('data', '*.html')]
+    paths_test = [os.path.join('data', '*.txt')]
     return {'astroquery.nist.tests': paths_test}

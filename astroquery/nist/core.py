@@ -95,28 +95,28 @@ class NistClass(BaseQuery):
 
         """
         request_payload = {}
-        request_payload["spectra"] = kwargs['linename']
+        request_payload["spectra"] = kwargs['linename'] # Default : "H I"
         (min_wav, max_wav, wav_unit) = _parse_wavelength(args[0], args[1])
         request_payload["limits_type"] = 0
         request_payload["low_wl"] = min_wav
         request_payload["upp_wl"] = max_wav
         request_payload["unit"] = wav_unit
         request_payload["submit"] = "Retrieve Data"
-        request_payload["format"] = 2 # This should output CSV
-        # request_payload["format"] = 1  # ascii
+        request_payload["de"] = 0 # Assures proper ASD database
+        request_payload["format"] = 2 # CSV
         request_payload["remove_js"] = "on" # Disables Javascript
         request_payload["line_out"] = 0  # All lines
         request_payload["en_unit"] = Nist.energy_level_code[
-            kwargs["energy_level_unit"]]
+            kwargs["energy_level_unit"]] # Default : eV
         request_payload["output"] = 0  # entirely rather than pagewise
         request_payload["bibrefs"] = 1
         request_payload["show_obs_wl"] = 1
         request_payload["show_calc_wl"] = 1
         request_payload["order_out"] = Nist.order_out_code[
-            kwargs['output_order']]
+            kwargs['output_order']] # Default : Wavelength
         request_payload["max_low_enrg"] = ""
         request_payload["show_av"] = Nist.wavelength_unit_code[
-            kwargs['wavelength_type']]
+            kwargs['wavelength_type']] # Default : vacuum
         request_payload["max_upp_enrg"] = ""
         request_payload["tsb_value"] = 0
         request_payload["min_str"] = ""
